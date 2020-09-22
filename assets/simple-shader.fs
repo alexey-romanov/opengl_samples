@@ -11,8 +11,8 @@ uniform sampler2D u_tex;
 float threshold = 100.0;
 
 // copy-pasted
-int mandelbrot(vec2 c) {
-    int n = 0;
+float mandelbrot(vec2 c) {
+    float n = 0.0;
 	vec2 z = vec2(0.0,0.0);
 	for(int i = 0; i < itr; i++){
 		vec2 znew;
@@ -26,14 +26,14 @@ int mandelbrot(vec2 c) {
 }
 
 // copy-pasted
-vec4 map_to_color(int n) {
-    vec3 textur = texture(u_tex, gl_FragCoord.xy).rgb;
-    return vec4(textur, 1.0);
+vec4 map_to_color(float n) {
+    vec3 textur = texture(u_tex, vec2(n, n)).rgb;
+    return vec4(textur.r, textur.g, textur.b, 1.0);
 }
 
 void main()
 {
     vec2 coord = vec2(gl_FragCoord.xy);
-    int n = mandelbrot(((coord - screenSize/2)/zoom) - offset);
+    float n = mandelbrot(((coord - screenSize/2)/zoom) - offset);
     o_frag_color = map_to_color(n);
 }

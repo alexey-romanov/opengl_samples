@@ -38,7 +38,7 @@ void load_image(GLuint & texture)
 {
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *image = stbi_load("lena.jpg",
+    unsigned char *image = stbi_load("gradient.jpg",
                                      &width,
                                      &height,
                                      &channels,
