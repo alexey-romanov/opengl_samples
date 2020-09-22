@@ -34,6 +34,24 @@ static void glfw_error_callback(int error, const char *description)
    std::cerr << fmt::format("Glfw Error {}: {}\n", error, description);
 }
 
+void load_image(GLuint & texture)
+{
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *image = stbi_load("lena.jpg",
+                                     &width,
+                                     &height,
+                                     &channels,
+                                     STBI_rgb);
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image);
+}
+
 void create_triangle(GLuint &vbo, GLuint &vao, GLuint &ebo)
 {
    // create the triangle
@@ -131,26 +149,6 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
     triangle_shader->set_uniform("screenSize", currentWidth, currentHeight);
 }
 
-void load_image(GLuint & texture)
-{
-    int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *image = stbi_load("lena.jpg",
-                                     &width,
-                                     &height,
-                                     &channels,
-                                     STBI_rgb);
-
-    std::cout << width << height << channels;
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(image);
-}
-
 int main(int, char **)
 {
    // Use GLFW to create a simple window
@@ -229,7 +227,7 @@ int main(int, char **)
       // GUI
       ImGui::Begin("Count of iterations");
        static int itr = 10;
-       ImGui::SliderInt("itr", &itr, 1, 2000);
+       ImGui::SliderInt("itr", &itr, 1, 1024);
       ImGui::End();
 
        triangle_shader->set_uniform("screenSize", 1280.0f, 720.0f);
@@ -237,7 +235,7 @@ int main(int, char **)
        triangle_shader->set_uniform("zoom", zoom);
        triangle_shader->set_uniform("offset", offsetX, offsetY);
 
-
+/*
       auto model = glm::rotate(glm::mat4(1), glm::radians(rotation * 60), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(2, 2, 2));
       auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
       auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
@@ -245,8 +243,8 @@ int main(int, char **)
       //glm::mat4 identity(1.0); 
       //mvp = identity;
       triangle_shader.set_uniform("u_mvp", glm::value_ptr(mvp));
-      triangle_shader.set_uniform("u_tex", int(0));
-
+*/
+      triangle_shader->set_uniform("u_tex", int(0));
 
       // Bind triangle shader
       triangle_shader->use();
