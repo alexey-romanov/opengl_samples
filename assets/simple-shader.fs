@@ -38,4 +38,16 @@ void main()
     vec2 coord = vec2(gl_FragCoord.xy);
     float t = mandelbrot(((coord - screenSize/2)/zoom) - offset);
     o_frag_color = map_to_color(float(t));
+uniform vec3 u_color;
+uniform float u_time;
+uniform sampler2D u_tex;
+    vec3 texture = texture(u_tex, v_out.color.xy).rgb;
+    //o_frag_color = vec4(v_out.color.xy,0,1.0);
+
+    //if ((int(gl_FragCoord.x / 30) % 2 == 0) ^^ (int(gl_FragCoord.y / 30) % 2 == 0))
+    //  discard;
+
+    o_frag_color = vec4(texture,1.0);
+
+    //gl_FragDepth = 0;
 }

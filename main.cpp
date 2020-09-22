@@ -1,3 +1,5 @@
+#pragma optimize("", off)
+
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -14,8 +16,16 @@
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
+// STB, load images
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+
 // Math constant and routines for OpenGL interop
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "opengl_shader.h"
 
@@ -121,6 +131,26 @@ void window_size_callback(GLFWwindow* window, int width, int height) {
     triangle_shader->set_uniform("screenSize", currentWidth, currentHeight);
 }
 
+void load_image(GLuint & texture)
+{
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *image = stbi_load("lena.jpg",
+                                     &width,
+                                     &height,
+                                     &channels,
+                                     STBI_rgb);
+
+    std::cout << width << height << channels;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(image);
+}
+
 int main(int, char **)
 {
    // Use GLFW to create a simple window
@@ -155,6 +185,9 @@ int main(int, char **)
       return 1;
    }
 
+   GLuint texture;
+   load_image(texture);
+
    // create our geometries
    GLuint vbo, vao, ebo;
    create_triangle(vbo, vao, ebo);
@@ -186,6 +219,7 @@ int main(int, char **)
       // Fill background with solid color
       glClearColor(0.30f, 0.55f, 0.60f, 1.00f);
       glClear(GL_COLOR_BUFFER_BIT);
+      //glEnable(GL_CULL_FACE);
 
       // Gui start new frame
       ImGui_ImplOpenGL3_NewFrame();
@@ -203,12 +237,28 @@ int main(int, char **)
        triangle_shader->set_uniform("zoom", zoom);
        triangle_shader->set_uniform("offset", offsetX, offsetY);
 
+
+      auto model = glm::rotate(glm::mat4(1), glm::radians(rotation * 60), glm::vec3(0, 1, 0)) * glm::scale(glm::vec3(2, 2, 2));
+      auto view = glm::lookAt<float>(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+      auto projection = glm::perspective<float>(90, float(display_w) / display_h, 0.1, 100);
+      auto mvp = projection * view * model;
+      //glm::mat4 identity(1.0); 
+      //mvp = identity;
+      triangle_shader.set_uniform("u_mvp", glm::value_ptr(mvp));
+      triangle_shader.set_uniform("u_tex", int(0));
+
+
       // Bind triangle shader
       triangle_shader->use();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, texture);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       // Bind vertex array = buffers + indices
       glBindVertexArray(vao);
       // Execute draw call
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+      glBindTexture(GL_TEXTURE_2D, 0);
       glBindVertexArray(0);
 
       // Generate gui render commands

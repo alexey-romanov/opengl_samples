@@ -1,2 +1,5 @@
 bindings
 build
+*.exe
+*.dll
+imgui.ini
