@@ -37,7 +37,6 @@ static void glfw_error_callback(int error, const char *description)
 void load_image(GLuint & texture)
 {
     int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
     unsigned char *image = stbi_load("gradient.jpg",
                                      &width,
                                      &height,
@@ -45,9 +44,9 @@ void load_image(GLuint & texture)
                                      STBI_rgb);
 
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_1D, texture);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB8, width, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glGenerateMipmap(GL_TEXTURE_1D);
 
     stbi_image_free(image);
 }
@@ -249,14 +248,15 @@ int main(int, char **)
       // Bind triangle shader
       triangle_shader->use();
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, texture);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glBindTexture(GL_TEXTURE_1D, texture);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       // Bind vertex array = buffers + indices
       glBindVertexArray(vao);
       // Execute draw call
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-      glBindTexture(GL_TEXTURE_2D, 0);
+      glBindTexture(GL_TEXTURE_1D, 0);
       glBindVertexArray(0);
 
       // Generate gui render commands

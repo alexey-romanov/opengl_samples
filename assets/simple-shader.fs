@@ -6,7 +6,7 @@ uniform int itr;
 uniform vec2 screenSize;
 uniform vec2 offset;
 uniform float zoom;
-uniform sampler2D u_tex;
+uniform sampler1D u_tex;
 
 float threshold = 100.0;
 
@@ -22,13 +22,13 @@ float mandelbrot(vec2 c) {
 		if((z.x * z.x) + (z.y * z.y) > threshold)break;
 		n++;
 	}
-	return n;
+	return n / float(itr);
 }
 
 // copy-pasted
 vec4 map_to_color(float n) {
-    vec3 textur = texture(u_tex, vec2(n, n)).rgb;
-    return vec4(textur.r, textur.g, textur.b, 1.0);
+    vec4 textur = texture1D(u_tex, n);
+    return textur;
 }
 
 void main()
