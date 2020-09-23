@@ -27,7 +27,7 @@ float mandelbrot(vec2 c) {
 
 // copy-pasted
 vec4 map_to_color(float n) {
-    vec4 textur = texture1D(u_tex, n);
+    vec4 textur = texture(u_tex, n);
     return textur;
 }
 
