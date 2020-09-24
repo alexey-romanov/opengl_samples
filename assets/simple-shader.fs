@@ -2,26 +2,38 @@
 
 out vec4 o_frag_color;
 
-struct vx_output_t
-{
-    vec3 color;
-};
+uniform int itr;
+uniform vec2 screenSize;
+uniform vec2 offset;
+uniform float zoom;
+uniform sampler1D u_tex;
 
-in vx_output_t v_out;
+float threshold = 100.0;
 
-uniform vec3 u_color;
-uniform float u_time;
-uniform sampler2D u_tex;
+// copy-pasted
+float mandelbrot(vec2 c) {
+    float n = 0.0;
+	vec2 z = vec2(0.0,0.0);
+	for(int i = 0; i < itr; i++){
+		vec2 znew;
+		znew.x = (z.x * z.x) - (z.y * z.y) + c.x;
+		znew.y = (2.0 * z.x * z.y) +c.y;
+		z = znew;
+		if((z.x * z.x) + (z.y * z.y) > threshold)break;
+		n++;
+	}
+	return n / float(itr);
+}
+
+// copy-pasted
+vec4 map_to_color(float n) {
+    vec4 textur = texture(u_tex, n);
+    return textur;
+}
 
 void main()
 {
-    vec3 texture = texture(u_tex, v_out.color.xy).rgb;
-    //o_frag_color = vec4(v_out.color.xy,0,1.0);
-
-    //if ((int(gl_FragCoord.x / 30) % 2 == 0) ^^ (int(gl_FragCoord.y / 30) % 2 == 0))
-    //  discard;
-
-    o_frag_color = vec4(texture,1.0);
-
-    //gl_FragDepth = 0;
+    vec2 coord = vec2(gl_FragCoord.xy);
+    float n = mandelbrot(((coord - screenSize/2)/zoom) - offset);
+    o_frag_color = map_to_color(n);
 }
